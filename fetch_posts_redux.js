@@ -4,26 +4,38 @@ import {
 } from 'redux-actions'
 
 const default_states = {
-    fetch_status: false,
     posts: []
 };
 
-export const fetch_status = createAction('fetch_status');
-export const fetch_status_reducer = handleAction(
-    fetch_status,
-    (state, action) => ({
-        ...state,
-        fetch_status: state.fetch_status,
-    }),
-    default_states.fetch_status
-);
-
-export const get_posts = createAction('get_posts');
-export const get_posts_reducer = handleAction(
-    get_posts,
-    (state, action) => ({
-        ...state,
-        posts: state.posts
-    }),
+export const action = createAction('getPosts');
+export const reducer = handleAction(
+    action,
+    (state, action) => {
+        return {
+            posts: action.payload.children.map((child, index) => {
+                return {
+                    key: index,
+                    text: child.data.title
+                }
+            })
+        }
+    },
     default_states.posts
 )
+export const mapStateToProps = state => ({
+    posts: state.posts
+});
+export const mapDispatchToProps = dispatch => ({
+    getPosts: async () => {
+        try 
+        {
+            let response = await fetch('https://www.reddit.com/r/NintendoSwitch.json');
+            let data = await response.json();
+            dispatch(action(data.data));
+        }
+        catch(err)
+        {
+            console.log(err);
+        }
+    }
+})
